@@ -99,57 +99,59 @@ async function loadSettings() {
 
 // Apply current settings to UI form
 function applySettingsToUI() {
-    // Theme selector
-    const themeSelect = document.getElementById('theme');
-    if (themeSelect) {
-        themeSelect.value = currentSettings.theme || 'light';
-    }
+    document.getElementById('theme').value = currentSettings.theme || 'light';
+    document.getElementById('pomodoro-duration').value = currentSettings.pomodoro_duration || 25;
+    document.getElementById('break-duration').value = currentSettings.break_duration || 5;
+    document.getElementById('long-break-duration').value = currentSettings.long_break_duration || 15;
+    document.getElementById('pomodoros-until-long-break').value = currentSettings.pomodoros_until_long_break || 4;
+    document.getElementById('notification-enabled').checked = currentSettings.notification_enabled !== false;
     
-    // Pomodoro duration
-    const pomodoroDuration = document.getElementById('pomodoro-duration');
-    if (pomodoroDuration) {
-        pomodoroDuration.value = currentSettings.pomodoro_duration || 25;
-    }
-    
-    // Break duration
-    const breakDuration = document.getElementById('break-duration');
-    if (breakDuration) {
-        breakDuration.value = currentSettings.break_duration || 5;
-    }
-    
-    // Notification enabled
-    const notificationEnabled = document.getElementById('notification-enabled');
-    if (notificationEnabled) {
-        notificationEnabled.checked = currentSettings.notification_enabled !== false;
-    }
+    // Apply theme
+    applyTheme(currentSettings.theme);
 }
 
 // Save settings
 async function saveSettings() {
     try {
-        // Get values from form
-        const theme = document.getElementById('theme').value;
-        const pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value);
-        const breakDuration = parseInt(document.getElementById('break-duration').value);
-        const notificationEnabled = document.getElementById('notification-enabled').checked;
+        // Get current settings values
+        const updatedSettings = {
+            theme: document.getElementById('theme').value,
+            pomodoro_duration: parseInt(document.getElementById('pomodoro-duration').value),
+            break_duration: parseInt(document.getElementById('break-duration').value),
+            long_break_duration: parseInt(document.getElementById('long-break-duration').value),
+            pomodoros_until_long_break: parseInt(document.getElementById('pomodoros-until-long-break').value),
+            notification_enabled: document.getElementById('notification-enabled').checked
+        };
         
-        // Validate values
-        if (isNaN(pomodoroDuration) || pomodoroDuration < 1 || pomodoroDuration > 120) {
+        // Validate settings
+        if (updatedSettings.pomodoro_duration < 1 || updatedSettings.pomodoro_duration > 120) {
             showNotification('Pomodoro duration must be between 1 and 120 minutes', 'error');
             return;
         }
         
-        if (isNaN(breakDuration) || breakDuration < 1 || breakDuration > 60) {
-            showNotification('Break duration must be between 1 and 60 minutes', 'error');
+        if (updatedSettings.break_duration < 1 || updatedSettings.break_duration > 60) {
+            showNotification('Short break duration must be between 1 and 60 minutes', 'error');
+            return;
+        }
+        
+        if (updatedSettings.long_break_duration < 5 || updatedSettings.long_break_duration > 120) {
+            showNotification('Long break duration must be between 5 and 120 minutes', 'error');
+            return;
+        }
+        
+        if (updatedSettings.pomodoros_until_long_break < 1 || updatedSettings.pomodoros_until_long_break > 10) {
+            showNotification('Pomodoros until long break must be between 1 and 10', 'error');
             return;
         }
         
         // Create settings object
         const settings = {
-            theme,
-            pomodoro_duration: pomodoroDuration,
-            break_duration: breakDuration,
-            notification_enabled: notificationEnabled
+            theme: updatedSettings.theme,
+            pomodoro_duration: updatedSettings.pomodoro_duration,
+            break_duration: updatedSettings.break_duration,
+            long_break_duration: updatedSettings.long_break_duration,
+            pomodoros_until_long_break: updatedSettings.pomodoros_until_long_break,
+            notification_enabled: updatedSettings.notification_enabled
         };
         
         // Save settings

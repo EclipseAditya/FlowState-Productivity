@@ -34,6 +34,9 @@ class SessionBase(BaseModel):
     duration: Optional[float] = None
     notes: Optional[str] = None
     is_completed: Optional[bool] = False
+    mode: Optional[str] = "standard"  # 'standard' or 'pomodoro'
+    pomodoro_count: Optional[int] = 0
+    breaks_taken: Optional[int] = 0
 
 class SessionCreate(SessionBase):
     pass

@@ -26,9 +26,14 @@ class Session(Base):
     task_id = Column(Integer, ForeignKey("tasks.id"), nullable=True)
     start_time = Column(DateTime, default=datetime.utcnow)
     end_time = Column(DateTime, nullable=True)
-    duration = Column(Float, nullable=True)  # Duration in minutes
+    duration = Column(Float, nullable=True)  # Duration in seconds
     notes = Column(Text, nullable=True)
     is_completed = Column(Boolean, default=False)
+    
+    # Additional fields for enhanced session features
+    mode = Column(String, default="standard")  # 'standard' or 'pomodoro'
+    pomodoro_count = Column(Integer, default=0)  # Number of pomodoros completed
+    breaks_taken = Column(Integer, default=0)  # Number of breaks taken
     
     # Relationship with task
     task = relationship("Task", back_populates="sessions") 

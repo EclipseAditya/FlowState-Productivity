@@ -252,7 +252,9 @@ def get_settings():
             "notification_enabled": True,
             "theme": "light",
             "pomodoro_duration": 25,
-            "break_duration": 5
+            "break_duration": 5,
+            "long_break_duration": 15,
+            "pomodoros_until_long_break": 4
         }
         
         with open(settings_file, "w") as f:
@@ -264,9 +266,23 @@ def get_settings():
     with open(settings_file, "r") as f:
         settings = json.load(f)
     
+    # Ensure all default settings exist
+    default_settings = {
+        "notification_enabled": True,
+        "theme": "light",
+        "pomodoro_duration": 25,
+        "break_duration": 5,
+        "long_break_duration": 15,
+        "pomodoros_until_long_break": 4
+    }
+    
+    # Add any missing default settings
+    for key, value in default_settings.items():
+        if key not in settings:
+            settings[key] = value
+    
     return settings
 
-# Duplicate without /api prefix
 @app.get("/settings/")
 def get_settings_no_prefix():
     return get_settings()

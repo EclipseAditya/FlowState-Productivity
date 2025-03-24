@@ -161,6 +161,10 @@
                         <div class="timer-display">
                             <h2 id="timer-display">00:00:00</h2>
                             <p id="session-status">Ready to start</p>
+                            <div id="session-mode" class="session-mode">
+                                <span id="current-mode">Focus</span>
+                                <span id="time-remaining"></span>
+                            </div>
                         </div>
                         
                         <div class="timer-buttons">
@@ -170,12 +174,52 @@
                             <button id="end-session-btn" class="btn btn-danger" disabled>End Session</button>
                         </div>
                         
+                        <div class="timer-mode-selector">
+                            <label for="timer-mode">Timer Mode:</label>
+                            <select id="timer-mode">
+                                <option value="standard">Standard</option>
+                                <option value="pomodoro">Pomodoro</option>
+                            </select>
+                        </div>
+                        
                         <div class="session-task-selector">
                             <label for="session-task">Working on:</label>
                             <select id="session-task">
                                 <option value="">-- Select a task --</option>
                                 <!-- Tasks will be loaded here -->
                             </select>
+                            <button id="add-task-to-session" class="btn btn-sm">+ Add task</button>
+                        </div>
+                        
+                        <div id="active-session-tasks" class="active-session-tasks">
+                            <h3>Current Tasks</h3>
+                            <ul id="active-tasks-list">
+                                <!-- Active tasks will be displayed here -->
+                                <li class="empty-state">No tasks selected</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="break-management">
+                        <div class="break-info">
+                            <h3>Break Time</h3>
+                            <p id="break-status">No active break</p>
+                            <p id="break-timer">00:00</p>
+                        </div>
+                        <div class="break-controls">
+                            <button id="start-break-btn" class="btn btn-secondary" disabled>Take a Break</button>
+                            <button id="skip-break-btn" class="btn btn-secondary" disabled>Skip Break</button>
+                            <button id="end-break-btn" class="btn btn-secondary" disabled>End Break</button>
+                        </div>
+                        <div id="break-suggestions" class="break-suggestions">
+                            <h4>Break Suggestions</h4>
+                            <ul>
+                                <li>Stand up and stretch</li>
+                                <li>Walk around for a few minutes</li>
+                                <li>Get a glass of water</li>
+                                <li>Do some quick breathing exercises</li>
+                                <li>Rest your eyes by looking away from the screen</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -188,6 +232,7 @@
                                 <th>Date</th>
                                 <th>Task</th>
                                 <th>Duration</th>
+                                <th>Mode</th>
                                 <th>Notes</th>
                             </tr>
                         </thead>
@@ -196,6 +241,24 @@
                         </tbody>
                     </table>
                     <p id="no-sessions-message" class="empty-state">No session history found.</p>
+                </div>
+                
+                <div id="pomodoro-stats" class="pomodoro-stats">
+                    <h2>Pomodoro Statistics</h2>
+                    <div class="pomodoro-metrics">
+                        <div class="metric">
+                            <h3>Pomodoros Completed</h3>
+                            <p id="pomodoros-completed">0</p>
+                        </div>
+                        <div class="metric">
+                            <h3>Breaks Taken</h3>
+                            <p id="breaks-taken">0</p>
+                        </div>
+                        <div class="metric">
+                            <h3>Focus Ratio</h3>
+                            <p id="focus-ratio">0%</p>
+                        </div>
+                    </div>
                 </div>
             </section>
             
@@ -273,8 +336,16 @@
                                 <input type="number" id="pomodoro-duration" name="pomodoro_duration" min="1" max="120" value="25">
                             </div>
                             <div class="setting-item">
-                                <label for="break-duration">Break Duration (minutes):</label>
+                                <label for="break-duration">Short Break Duration (minutes):</label>
                                 <input type="number" id="break-duration" name="break_duration" min="1" max="60" value="5">
+                            </div>
+                            <div class="setting-item">
+                                <label for="long-break-duration">Long Break Duration (minutes):</label>
+                                <input type="number" id="long-break-duration" name="long_break_duration" min="5" max="120" value="15">
+                            </div>
+                            <div class="setting-item">
+                                <label for="pomodoros-until-long-break">Pomodoros until Long Break:</label>
+                                <input type="number" id="pomodoros-until-long-break" name="pomodoros_until_long_break" min="1" max="10" value="4">
                             </div>
                         </div>
                         
