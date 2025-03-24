@@ -26,12 +26,22 @@ async function loadStatisticsData() {
             tasksData = await window.electron.invoke('get-tasks');
             sessionsData = await window.electron.invoke('get-sessions');
         } else {
-            // Use fetch API for web version
-            const tasksRes = await fetch('http://localhost:8000/api/tasks');
+            // Use fetch API for web
+            console.log('Fetching statistics data from API...');
+            const tasksRes = await fetch('http://localhost:8000/api/tasks/');
+            const sessionsRes = await fetch('http://localhost:8000/api/sessions/');
+            
+            if (!tasksRes.ok) {
+                throw new Error(`Failed to fetch tasks: ${tasksRes.status}`);
+            }
             tasksData = await tasksRes.json();
             
-            const sessionsRes = await fetch('http://localhost:8000/api/sessions');
+            if (!sessionsRes.ok) {
+                throw new Error(`Failed to fetch sessions: ${sessionsRes.status}`);
+            }
             sessionsData = await sessionsRes.json();
+            
+            console.log('Statistics data loaded:', { tasks: tasksData, sessions: sessionsData });
         }
         
         // Process and display the statistics
@@ -39,7 +49,7 @@ async function loadStatisticsData() {
         
     } catch (error) {
         console.error('Error loading statistics data:', error);
-        showNotification('Failed to load statistics data', 'error');
+        showNotification('Failed to load statistics data: ' + error.message, 'error');
     }
 }
 

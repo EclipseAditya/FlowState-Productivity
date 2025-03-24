@@ -36,14 +36,21 @@ async function loadSessionHistory() {
             response = await window.electron.invoke('get-sessions');
         } else {
             // Use fetch API for web version
-            const res = await fetch('http://localhost:8000/api/sessions');
+            console.log('Fetching sessions from API...');
+            const res = await fetch('http://localhost:8000/api/sessions/');
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('Error response:', res.status, errorText);
+                throw new Error(`API returned ${res.status}: ${errorText}`);
+            }
             response = await res.json();
+            console.log('Sessions loaded:', response);
         }
         
         renderSessionHistory(response);
     } catch (error) {
         console.error('Error loading session history:', error);
-        showNotification('Failed to load session history', 'error');
+        showNotification('Failed to load session history: ' + error.message, 'error');
     }
 }
 
@@ -207,13 +214,23 @@ async function endSession() {
         if (window.electron) {
             await window.electron.invoke('add-session', sessionData);
         } else {
-            await fetch('http://localhost:8000/api/sessions', {
+            console.log('Saving session data:', sessionData);
+            const response = await fetch('http://localhost:8000/api/sessions/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(sessionData)
             });
+            
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error(`Server error (${response.status}):`, errorData);
+                throw new Error(`Server returned ${response.status}: ${errorData}`);
+            }
+            
+            const result = await response.json();
+            console.log('Session saved:', result);
         }
         
         // Reset session state
@@ -251,7 +268,7 @@ async function endSession() {
         
     } catch (error) {
         console.error('Error saving session:', error);
-        showNotification('Failed to save session', 'error');
+        showNotification(`Failed to save session: ${error.message}`, 'error');
     }
 }
 

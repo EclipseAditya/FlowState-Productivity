@@ -7,7 +7,6 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 BACKEND_DIR="$SCRIPT_DIR/backend"
-VENV_DIR="$SCRIPT_DIR/.venv"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -30,48 +29,18 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Check for pip3
-if ! command -v pip3 &> /dev/null; then
-    echo -e "${RED}pip3 not found. Please install pip3.${NC}"
-    exit 1
-fi
-
-# Create virtual environment if it doesn't exist
-if [ ! -d "$VENV_DIR" ]; then
-    echo -e "${YELLOW}Creating Python virtual environment...${NC}"
-    python3 -m venv "$VENV_DIR" || {
-        echo -e "${YELLOW}Failed to create venv, trying with virtualenv...${NC}"
-        if ! command -v virtualenv &> /dev/null; then
-            pip3 install virtualenv
-        fi
-        virtualenv "$VENV_DIR"
+# Check for uvicorn
+if ! command -v uvicorn &> /dev/null; then
+    echo -e "${YELLOW}uvicorn not found. Installing it globally...${NC}"
+    sudo apt-get install -y python3-fastapi python3-uvicorn python3-sqlalchemy python3-pydantic || {
+        echo -e "${RED}Failed to install required Python packages.${NC}"
+        exit 1
     }
 fi
-
-# Activate virtual environment
-echo -e "${GREEN}Activating virtual environment...${NC}"
-source "$VENV_DIR/bin/activate" || {
-    echo -e "${RED}Failed to activate virtual environment.${NC}"
-    exit 1
-}
 
 # Install dependencies
 echo -e "${GREEN}Installing dependencies...${NC}"
 npm install
-
-# Install Python dependencies
-echo -e "${GREEN}Installing Python dependencies...${NC}"
-pip3 install -r "$BACKEND_DIR/requirements.txt"
-
-# Cleanup function to deactivate virtual environment
-cleanup() {
-    echo -e "${GREEN}Deactivating virtual environment...${NC}"
-    deactivate
-    exit
-}
-
-# Register cleanup function
-trap cleanup EXIT
 
 # Start the application
 if [[ "$1" == "--dev" ]]; then

@@ -56,9 +56,15 @@ async function loadSettings() {
         } else {
             // Use fetch API for web version or fall back to localStorage
             try {
-                const res = await fetch('http://localhost:8000/api/settings');
+                console.log('Fetching settings from API...');
+                const res = await fetch('http://localhost:8000/api/settings/');
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch settings: ${res.status}`);
+                }
                 settings = await res.json();
+                console.log('Settings loaded:', settings);
             } catch (error) {
+                console.warn('Failed to load settings from API, falling back to localStorage:', error);
                 // Fall back to localStorage
                 const savedSettings = localStorage.getItem('flowstate_settings');
                 if (savedSettings) {
@@ -150,16 +156,27 @@ async function saveSettings() {
         if (window.electron) {
             await window.electron.invoke('save-settings', settings);
         } else {
-            // Use fetch API or localStorage for web version
+            // Use fetch API for web version
             try {
-                await fetch('http://localhost:8000/api/settings', {
+                console.log('Saving settings to API:', settings);
+                const response = await fetch('http://localhost:8000/api/settings/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(settings)
                 });
+                
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    console.error(`Server error (${response.status}):`, errorData);
+                    throw new Error(`Server returned ${response.status}: ${errorData}`);
+                }
+                
+                const result = await response.json();
+                console.log('Settings saved:', result);
             } catch (error) {
+                console.error('Error saving settings to API:', error);
                 // Fall back to localStorage
                 localStorage.setItem('flowstate_settings', JSON.stringify(settings));
             }
@@ -175,7 +192,7 @@ async function saveSettings() {
         showNotification('Settings saved successfully', 'success');
     } catch (error) {
         console.error('Error saving settings:', error);
-        showNotification('Failed to save settings', 'error');
+        showNotification(`Failed to save settings: ${error.message}`, 'error');
     }
 }
 

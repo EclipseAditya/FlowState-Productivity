@@ -66,8 +66,15 @@ async function loadTasks() {
             response = await window.electron.invoke('get-tasks');
         } else {
             // Use fetch API for web version
-            const res = await fetch('http://localhost:8000/api/tasks');
+            console.log('Fetching tasks from API...');
+            const res = await fetch('http://localhost:8000/api/tasks/');
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('Error response:', res.status, errorText);
+                throw new Error(`API returned ${res.status}: ${errorText}`);
+            }
             response = await res.json();
+            console.log('Tasks loaded:', response);
         }
         
         tasks = response;
@@ -79,7 +86,7 @@ async function loadTasks() {
         updateSessionTaskSelector();
     } catch (error) {
         console.error('Error loading tasks:', error);
-        showNotification('Failed to load tasks', 'error');
+        showNotification('Failed to load tasks: ' + error.message, 'error');
     }
 }
 
@@ -285,11 +292,14 @@ async function saveTask() {
         return;
     }
     
+    console.log('Saving task data:', taskData);
+    
     try {
         let response;
         
         if (window.electron) {
             // Use Electron IPC
+            console.log('Using Electron IPC for saving task');
             if (isNewTask) {
                 response = await window.electron.invoke('add-task', taskData);
             } else {
@@ -297,12 +307,14 @@ async function saveTask() {
             }
         } else {
             // Use fetch API for web version
+            console.log('Using Fetch API for saving task');
             const url = isNewTask 
-                ? 'http://localhost:8000/api/tasks' 
+                ? 'http://localhost:8000/api/tasks/' 
                 : `http://localhost:8000/api/tasks/${taskId}`;
                 
             const method = isNewTask ? 'POST' : 'PUT';
             
+            console.log(`Sending ${method} request to ${url}`, taskData);
             const res = await fetch(url, {
                 method: method,
                 headers: {
@@ -311,7 +323,14 @@ async function saveTask() {
                 body: JSON.stringify(taskData)
             });
             
+            if (!res.ok) {
+                const errorData = await res.text();
+                console.error(`Server error (${res.status}):`, errorData);
+                throw new Error(`Server returned ${res.status}: ${errorData}`);
+            }
+            
             response = await res.json();
+            console.log('Server response:', response);
         }
         
         // Hide the modal and reload tasks
@@ -325,7 +344,7 @@ async function saveTask() {
         );
     } catch (error) {
         console.error('Error saving task:', error);
-        showNotification('Failed to save task', 'error');
+        showNotification(`Failed to save task: ${error.message}`, 'error');
     }
 }
 
@@ -337,9 +356,15 @@ async function deleteTask(taskId) {
         if (window.electron) {
             await window.electron.invoke('delete-task', taskId);
         } else {
-            await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+            const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
                 method: 'DELETE'
             });
+            
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error(`Server error (${response.status}):`, errorData);
+                throw new Error(`Server returned ${response.status}: ${errorData}`);
+            }
         }
         
         // Reload tasks to refresh the UI
@@ -347,7 +372,7 @@ async function deleteTask(taskId) {
         showNotification('Task deleted successfully', 'success');
     } catch (error) {
         console.error('Error deleting task:', error);
-        showNotification('Failed to delete task', 'error');
+        showNotification(`Failed to delete task: ${error.message}`, 'error');
     }
 }
 
