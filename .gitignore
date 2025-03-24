@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+/dist
+/build
+/out
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+/data
+
+# Temporary files
+.tmp/
+.temp/
+.cache/
+tmp/
+temp/
+
+# Large Electron files - specifically exclude these
+node_modules/electron/dist/electron
+node_modules/electron/dist/chrome-sandbox
+node_modules/electron/dist/*.bin
+node_modules/electron/dist/*.dll
+node_modules/electron/dist/*.exe
+node_modules/electron/dist/*.dat
+node_modules/electron/dist/*.pak
+node_modules/**/*.node
+
+# IDE and editor specific
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+.env/
+.env.bak/
+venv.bak/
+.venv.bak/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/ node_modules/
+.venv/
+data/
